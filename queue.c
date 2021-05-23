@@ -1,25 +1,57 @@
 #include "queue.h"
 
-struct queue *queue_init(int num) {
+
+error_t queue_init(struct queue ** out, int num) {
+  error_t err = NoErrors;
+
   struct queue *q = (struct queue *)malloc(sizeof(struct queue));
+  
+  if (NULL == q) {
+    err = MemoryError;
+    return err;
+  }
+
   q->qu = (int *)malloc(num * sizeof(int));
+  
+  if (NULL == q->qu) {
+    err = MemoryError;
+    free(q);
+    return err;
+  }
+  
   q->frnt = 0;
   q->rear = -1;
   q->qmax = num;
-  return q;
+  
+  *out = q;
+
+  return err;
 }
 
-void queue_push(struct queue *q, int x) {
+error_t queue_push(struct queue *q, int x) {
+
+  error_t err = NoErrors;
+
+  if (NULL == q) {
+    err = InvalidArg;
+    return err;
+  }
 
   if (q->rear < q->qmax - 1) {
     q->rear++;
     q->qu[q->rear] = x;
-  } else
-    printf("Очередь полна!\n");
-  return;
+  } else {
+    err = MemoryError;
+    return err;
+  }
+  return err;
 }
 
 int queue_empty(struct queue *q) {
+
+  if (NULL == q) {
+    return 1;
+  }
 
   if (q->rear < q->frnt)
     return 1;
@@ -27,11 +59,13 @@ int queue_empty(struct queue *q) {
     return 0;
 }
 
-void queue_print(struct queue *q) {
+error_t queue_print(struct queue *q) {
+
+  error_t err = NoErrors;
 
   if (queue_empty(q) == 1) {
-    printf("Очередь пуста!\n");
-    return;
+    err = MemoryError;
+    return err;
   }
 
   int h;
@@ -39,14 +73,16 @@ void queue_print(struct queue *q) {
     printf("%d ", q->qu[h]);
   }
   printf("\n");
-  return;
+  
+  return err;
 }
 
-int queue_pop(struct queue *q) {
+error_t queue_pop(int* out, struct queue *q) {
 
+  error_t err = NoErrors;
   if (queue_empty(q) == 1) {
-    printf("Очередь пуста!\n");
-    return 0;
+    err = MemoryError;
+    return err;
   }
 
   int x, h;
@@ -55,5 +91,25 @@ int queue_pop(struct queue *q) {
     q->qu[h] = q->qu[h + 1];
   }
   q->rear--;
-  return x;
+  
+  *out = x;
+
+  return err;
+}
+
+error_t queue_delete(struct queue *q) {
+  error_t err = NoErrors;
+
+  if (NULL == q) {
+    err = InvalidArg;
+    return err;
+  }
+  if (NULL == q->qu) {
+    err = MemoryError;
+    return err;
+  }
+  free(q->qu);
+  free(q);
+
+  return err;
 }

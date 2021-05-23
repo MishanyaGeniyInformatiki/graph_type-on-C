@@ -1,25 +1,51 @@
-#include "graph.h"
 #include "queue.h"
+#include "graph.h"
+#include "errors.h"
 
-struct Vertex *addVertex(int val) {
+
+error_t addVertex(struct Vertex ** out, int val) {
+  error_t err = NoErrors;
   struct Vertex *newVertex = (struct Vertex *)malloc(sizeof(struct Vertex));
+
+  if (NULL == newVertex) {
+	   err = MemoryError;
+     return err;
+  }
 
   newVertex->num = val;
   newVertex->next = NULL;
 
-  return newVertex;
+  *out = newVertex;
+
+  return err;
 }
 
-struct Graph *createGraph(int numVertices) {
+error_t createGraph(  struct Graph ** out, int numVertices) {
+  error_t err = NoErrors;
+
+  if (out == NULL) {
+    return MemoryError;
+  }
+
   struct Graph *newGraph = (struct Graph *)malloc(sizeof(struct Graph));
+
+  if (NULL == newGraph) {
+	  err = MemoryError;
+    return err;
+  }
+
   newGraph->numVertices = numVertices;
 
   newGraph->adjLists =
       (struct Vertex **)malloc(numVertices * sizeof(struct Vertex *));
+  
+  if (NULL == newGraph->adjLists) {
+	  err = MemoryError;
+    return err;
+  }
 
   for (int i = 0; i < numVertices; i++)
-    newGraph->adjLists[i] =
-        addVertex(i); // создаю столбец с вершинами: типа
+    addVertex(&(newGraph->adjLists[i]), i); // создаю столбец с вершинами: типа
   // 0 -> NULL
   // 1 -> NULL
   // 2 -> NULL
@@ -27,10 +53,12 @@ struct Graph *createGraph(int numVertices) {
   // . -> NULL
   // i -> NULL
 
-  return newGraph;
+  *out = newGraph;
+
+  return err;
 }
 
-void addEdge(struct Graph *graph, int start, int final, double weight) {
+error_t addEdge(struct Graph *graph, int start, int final, double weight) {
   /*
   struct Vertex* temp = graph->adjLists[start]->next; // указатель на ребенка
   start - вершины graph->adjLists[start]->next = addVertex(graph, final); //
@@ -41,9 +69,21 @@ void addEdge(struct Graph *graph, int start, int final, double weight) {
   graph->adjLists[start]->next->weight = graph->adjLists[start]->weight;
   graph->adjLists[start]->weight = weight;
   */
+  error_t err = NoErrors;
+  
+  if (final == start) {
+	  err = LoopError;
+    return err;
+  }
+
+  if ((final >= graph->numVertices) || (start >= graph->numVertices)) {
+	  err = VertexNotExistsError;
+    return err;
+  }
 
   struct Vertex *temp = graph->adjLists[start]->next;
-  struct Vertex *vert = addVertex(final);
+  struct Vertex *vert;
+  addVertex(&vert, final);
   graph->adjLists[start]->next = vert; // вставляю нужную
   // вершину после start (головной вершины)
   vert->next = temp; // организовываю связь между final и temp
@@ -58,11 +98,13 @@ void addEdge(struct Graph *graph, int start, int final, double weight) {
   temp->next = addVertex(graph, final); // вмечто NULL создаем указатель на
   необходимую вершину temp->weight = weight;
   */
+
+  return err;
 }
 
-int findWeightestEdge(struct Graph *graph) {
-
-  int weightestEdge = graph->adjLists[0]->weight;
+error_t findWeightestEdge(double* out, struct Graph *graph) {
+  error_t err = NoErrors;
+  double weightestEdge = graph->adjLists[0]->weight;
 
   for (int i = 0; i < graph->numVertices; i++) {
     struct Vertex *temp = graph->adjLists[i];
@@ -74,10 +116,17 @@ int findWeightestEdge(struct Graph *graph) {
       temp = temp->next;
     }
   }
-  return weightestEdge;
+  *out = weightestEdge; 
+  return err;
 }
 
-void printGraph(struct Graph *graph) {
+error_t printGraph(struct Graph *graph) {
+  error_t err = NoErrors;
+
+  if (NULL == graph) {
+    err = InvalidArg;
+    return err;
+  }
 
   for (int v = 0; v < graph->numVertices; v++) {
     struct Vertex *temp = graph->adjLists[v]->next;
@@ -95,55 +144,76 @@ void printGraph(struct Graph *graph) {
       temp = temp->next;
     }
     printf("\n");
+
   }
-
-  /*
-for (int v = 0; v < graph->numVertices; v++)
-{
-  struct Vertex* temp = graph->adjLists[v];
-  printf("\n Adjacency list of vertex %d\n ", v);
-
-
-  // печать весов ребер
-  struct Vertex* temp2 = temp;
-  struct Vertex* temp3 = temp->next;
-  while(temp3)
-  {
-          printf("  %d    ",temp2->weight);
-          temp2 = temp2->next;
-          temp3 = temp3->next;
-  }
-  printf("\n");
-
-
-  while(temp)
-  {
-      printf("%d ---> ", temp->num);
-      temp = temp->next;
-  }
-  printf("\n");
-}
-*/
+  return err;
 }
 
-int degree(struct Graph *graph, int num) {
+error_t degree(int* out, struct Graph *graph, int num) {
+  error_t err = NoErrors;
+
+  if (num >= graph->numVertices) {
+	  err = VertexNotExistsError;
+    return err;
+  }
+
   int count = 0;
   struct Vertex *temp = graph->adjLists[num]->next;
   while (temp) {
     temp = temp->next;
     count++;
   }
-  return count;
+  *out = count;
+  return err;
 }
 
-void dijkstra(struct Graph *graph, int start) {
+error_t deleteGraph(struct Graph *graph){
 
-  struct queue *q = queue_init(graph->numVertices); // создаю очередь
+  error_t err = NoErrors;
+
+  if (NULL == graph) {
+    err = InvalidArg;
+    return err;
+  }
+
+  for(int i = 0; i < graph->numVertices; i++){
+
+    struct Vertex *temp = graph->adjLists[i];
+    struct Vertex *pred = temp;
+
+    while(temp){
+
+      pred = temp;
+      temp = pred->next;
+      free(pred);
+      //printf("free is success\n");
+    }
+  }
+  free(graph->adjLists);
+  free(graph);
+
+  return err;
+  //printf("free graph is success\n");
+}
+
+error_t dijkstra(struct Graph *graph, int start) {
+  error_t err = NoErrors;
+
+  struct queue *q;
+  queue_init(&q, graph->numVertices); // создаю очередь
 
   bool visited[graph->numVertices];
   double dist[graph->numVertices];
 
   long INF = LONG_MAX; // LONG_MAX
+  
+  double weightest = INF;
+  findWeightestEdge(&weightest, graph);
+  
+  if ((graph->numVertices)*weightest >= INF){
+    err = WeightOutOfRangeError;
+    return err;
+  }
 
   for (int i = 0; i < graph->numVertices; i++) {
     visited[i] = false;
@@ -155,14 +225,16 @@ void dijkstra(struct Graph *graph, int start) {
 
   while (!queue_empty(q)) {
 
-    int vert = queue_pop(q); // достаю из очереди вершину
+    int vert;
+    queue_pop(&vert, q); // достаю из очереди вершину
     visited[vert] = true;    // помечаю ее как посещенную
 
     struct Vertex *currentVert =
         graph->adjLists[vert]; // текущая вершина
                                // (при i = 0 первая после head-вершины)
-
-    for (int i = 0; i < degree(graph, vert);
+    int deg = 0;
+    degree(&deg, graph, vert);
+    for (int i = 0; i < deg;
          i++) { // рассматриваю все вершины смежные с vert
 
       currentVert = currentVert->next;
@@ -190,60 +262,11 @@ void dijkstra(struct Graph *graph, int start) {
     }
   }
 
+  queue_delete(q);
+
   for (int i = 0; i < graph->numVertices; i++) { // печатаю расстояния
     printf("Distance from %d vertex to %d vertex = %.0f\n", start, i, dist[i]);
   }
 
-  /*
-  int i;
-  struct Vertex* p;
-  bool intree[100];
-  int distance[100];
-  int parent[100];
-  int v;
-  int w;
-  int weight;
-  int dist;
-  for (i = 0; i < graph->numVertices; i++){
-          intree[i] = false;
-          distance[i] = 666;
-          //parent[i] = -1;
-  }
-
-  distance[start] = 0;
-  v = start;
-
-
-  while (intree[v] == false){
-          intree[v] == true;
-          p = graph->adjLists[v];
-
-          while (p != NULL){
-                  w = p->num;
-
-                  weight = p->weight;
-                  if (distance[w] > (distance[v] + weight)){
-                          distance[w] = distance[v] + weight;
-                          parent[w] = v;
-                  }
-                  p = p->next;
-
-          }
-
-          //v = 1;
-          dist = 666;
-          for (i = 0; i < graph->numVertices; i++){
-                  if ((intree[i] == false) && (dist > distance[i])){
-                          dist = distance[i];
-                          v = i;
-                  }
-          }
-  }
-
-
-  printf("dfdf");
-
-  for (i=0;i<graph->numVertices;i++){
-          printf("%d\n ", distance[i]);
-  }*/
+  return err;
 }

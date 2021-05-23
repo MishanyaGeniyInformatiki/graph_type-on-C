@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
@@ -6,6 +7,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <limits.h>
+#include "errors.h"
+
 
 struct Vertex
 {
@@ -24,13 +27,12 @@ struct Graph
 };
 
 
-struct Vertex* addVertex(int val);
-struct Graph* createGraph(int numVertices);
-void addEdge(struct Graph* graph, int start, int final, double weight);
-int findWeightestEdge(struct Graph* graph);
-void printGraph(struct Graph* graph);
-int degree(struct Graph* graph, int num);
+error_t addVertex(struct Vertex ** out, int val);
+error_t createGraph( struct Graph ** out, int numVertices);
+error_t addEdge(struct Graph* graph, int start, int final, double weight);
+error_t findWeightestEdge(double* out, struct Graph *graph);
+error_t printGraph(struct Graph *graph);
+error_t degree(int* out, struct Graph *graph, int num);
+error_t deleteGraph(struct Graph *graph);
 
-void dijkstra(struct Graph* graph, int start);
-
-void dijkstra_test_dataset();
+error_t dijkstra(struct Graph *graph, int start);
