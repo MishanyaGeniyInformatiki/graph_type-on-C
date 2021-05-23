@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "queue.h"
 
 struct Vertex *addVertex(int val) {
   struct Vertex *newVertex = (struct Vertex *)malloc(sizeof(struct Vertex));
@@ -83,7 +84,7 @@ void printGraph(struct Graph *graph) {
     printf("\n Adjacency list of vertex %d\n ", v);
 
     while (temp) {
-      printf("  %lf    ", temp->weight);
+      printf("  %.0f    ", temp->weight);
       temp = temp->next;
     }
     printf("\n");
@@ -142,7 +143,7 @@ void dijkstra(struct Graph *graph, int start) {
   bool visited[graph->numVertices];
   double dist[graph->numVertices];
 
-  long int INF = pow(2, (sizeof(long int) * 4 - 1)) - 1; // 2 147 483 647
+  long INF = LONG_MAX; // LONG_MAX
 
   for (int i = 0; i < graph->numVertices; i++) {
     visited[i] = false;
@@ -165,16 +166,16 @@ void dijkstra(struct Graph *graph, int start) {
          i++) { // рассматриваю все вершины смежные с vert
 
       currentVert = currentVert->next;
-      int weight = currentVert->weight;
+      double weight = currentVert->weight;
       int num = currentVert->num;
 
       if (!visited[num] && dist[vert] + weight < dist[num]) { // этап релаксации
-
         dist[num] = dist[vert] + weight;
+
       }
     }
 
-    int min_dist = INF;
+    long min_dist = INF;
     for (int i = 0; i < graph->numVertices;
          i++) { // выбираю на роль следующей вершины вершину с минимальным dist
 
@@ -190,7 +191,7 @@ void dijkstra(struct Graph *graph, int start) {
   }
 
   for (int i = 0; i < graph->numVertices; i++) { // печатаю расстояния
-    printf("Distance from %d vertex to %d vertex = %d\n", start, i, dist[i]);
+    printf("Distance from %d vertex to %d vertex = %.0f\n", start, i, dist[i]);
   }
 
   /*
