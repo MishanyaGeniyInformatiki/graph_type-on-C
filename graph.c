@@ -212,6 +212,7 @@ error_t dijkstra(struct Graph *graph, int start) {
   
   if ((graph->numVertices)*weightest >= INF){
     err = WeightOutOfRangeError;
+    queue_delete(q);
     return err;
   }
 
