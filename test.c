@@ -21,8 +21,8 @@ void dijkstra_test_dataset() {
   error_catcher(addEdge(graph, 3, 2, 11));
   error_catcher(addEdge(graph, 3, 4, 6));
   error_catcher(addEdge(graph, 4, 3, 6));
-  error_catcher(addEdge(graph, 4, 5, 9));
-  error_catcher(addEdge(graph, 5, 4, 9));
+  error_catcher(addEdge(graph, 4, 5, 8));
+  error_catcher(addEdge(graph, 5, 4, 8));
   error_catcher(addEdge(graph, 5, 2, 2));
   error_catcher(addEdge(graph, 5, 0, 14));
   // 1 до 2-й составляет 7, до 3-й — 9, до 4-й — 20, до 5-й — 20, до 6-й — 11.
@@ -56,13 +56,6 @@ void test_dataset(){
     error_catcher(addEdge(graph, 0, 1, 54));
     error_catcher(addEdge(graph, 1, 0, 54));
     error_catcher(degree(&deg, graph, 2));
-    error_catcher(deleteGraph(graph));
-
-    error_catcher(createGraph(&graph, 2)); // тест на слишком тяжелое ребро в dijkstra
-
-    error_catcher(addEdge(graph, 0, 1, LONG_MAX));
-    error_catcher(addEdge(graph, 1, 0, 54));
-    error_catcher(dijkstra(graph, 0));
     error_catcher(deleteGraph(graph));
 }
 

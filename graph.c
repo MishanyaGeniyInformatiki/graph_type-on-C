@@ -20,7 +20,7 @@ error_t addVertex(struct Vertex ** out, int val) {
   return err;
 }
 
-error_t createGraph(  struct Graph ** out, int numVertices) {
+error_t createGraph(struct Graph ** out, int numVertices) {
   error_t err = NoErrors;
 
   if (out == NULL) {
@@ -41,6 +41,7 @@ error_t createGraph(  struct Graph ** out, int numVertices) {
   
   if (NULL == newGraph->adjLists) {
 	  err = MemoryError;
+    //free(newGraph); 
     return err;
   }
 
@@ -102,9 +103,9 @@ error_t addEdge(struct Graph *graph, int start, int final, double weight) {
   return err;
 }
 
-error_t findWeightestEdge(double* out, struct Graph *graph) {
+/*error_t findWeightestEdge(double* out, struct Graph *graph) {
   error_t err = NoErrors;
-  double weightestEdge = graph->adjLists[0]->weight;
+  double weightestEdge = graph->adjLists[1]->weight;
 
   for (int i = 0; i < graph->numVertices; i++) {
     struct Vertex *temp = graph->adjLists[i];
@@ -118,7 +119,7 @@ error_t findWeightestEdge(double* out, struct Graph *graph) {
   }
   *out = weightestEdge; 
   return err;
-}
+}*/
 
 error_t printGraph(struct Graph *graph) {
   error_t err = NoErrors;
@@ -207,14 +208,6 @@ error_t dijkstra(struct Graph *graph, int start) {
 
   long INF = LONG_MAX; // LONG_MAX
   
-  double weightest = INF;
-  findWeightestEdge(&weightest, graph);
-  
-  if ((graph->numVertices)*weightest >= INF){
-    err = WeightOutOfRangeError;
-    queue_delete(q);
-    return err;
-  }
 
   for (int i = 0; i < graph->numVertices; i++) {
     visited[i] = false;
