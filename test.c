@@ -1,5 +1,7 @@
-#include "errors.c"
+#include "queue.h"
 #include "graph.h"
+#include "errors.h"
+
 
 
 void dijkstra_test_dataset() {
@@ -44,6 +46,8 @@ void test_dataset(){
     error_catcher(deleteGraph(graph));
 
     error_catcher(createGraph(NULL, 5));
+    error_catcher(printGraph(NULL));
+    error_catcher(deleteGraph(NULL));
 
     error_catcher(createGraph(&graph, 2)); // тест на недопустимый номер вершины в функции addEdge
 
@@ -57,6 +61,23 @@ void test_dataset(){
     error_catcher(addEdge(graph, 1, 0, 54));
     error_catcher(degree(&deg, graph, 2));
     error_catcher(deleteGraph(graph));
+
+// queue
+    struct queue *q = NULL;
+    error_catcher(queue_init(&q, 7));
+    error_catcher(queue_print(q));
+    error_catcher(queue_delete(q));
+
+
+    struct queue *q1;
+    error_catcher(queue_init(&q1, 4));
+    printf("%d", queue_empty(q1));
+    error_catcher(queue_push(q1, 1));
+    error_catcher(queue_push(q1, 2));
+    error_catcher(queue_push(q1, 3));
+    error_catcher(queue_push(q1, 4));
+    error_catcher(queue_print(q1));
+    error_catcher(queue_delete(q1));
 }
 
 int main() {
