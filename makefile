@@ -2,7 +2,7 @@ CFLAGS = -Wall -Wextra -g -fprofile-arcs -ftest-coverage
 all: graph rm
 
 graph: errors.o queue.o graph.o test.o
-	gcc queue.o graph.o test.o -o graph ${CFLAGS}
+	gcc errors.o queue.o graph.o test.o -o graph ${CFLAGS}
 
 errors.o: errors.c
 	gcc -c errors.c ${CFLAGS}
